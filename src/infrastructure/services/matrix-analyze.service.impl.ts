@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { MatrixAnalyseService } from '../../domain/services/matrix-analyse.service';
 import { MatrixAnalyseDto } from '../../shared/dtos/matrix-analyse.dto';
 import { envs } from '../../config/envs';
+import { CustomError } from '../../domain/errors/custom.error';
 
 export class MatrixAnalyseServiceImpl implements MatrixAnalyseService {
   private readonly http: AxiosInstance;
@@ -18,11 +19,15 @@ export class MatrixAnalyseServiceImpl implements MatrixAnalyseService {
   }
 
   async analyze(QMatrix: number[][], RMatrix: number[][]): Promise<MatrixAnalyseDto> {
-    const matrixAnalysisResponse = await this.http.post<MatrixAnalyseDto>('/api/v1/matrix/analyse', {
-      QMatrix,
-      RMatrix,
-    });
-
-    return matrixAnalysisResponse.data;
+    try {
+      const matrixAnalysisResponse = await this.http.post<MatrixAnalyseDto>('/api/v1/matrix/analyse', {
+        QMatrix,
+        RMatrix,
+      });
+  
+      return matrixAnalysisResponse.data;
+    } catch (error: any) {
+      throw CustomError.internalServerError(`${error.message}`);
+    }
   }
 }
